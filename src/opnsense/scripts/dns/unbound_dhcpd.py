@@ -112,6 +112,7 @@ def main():
                     unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         cached_leases[address]['client-hostname'], app_params['domain'], address)
                     )
+                #me code
             # signal unbound
             for address in cached_leases:
                 if address not in known_addresses:
