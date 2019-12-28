@@ -122,7 +122,8 @@ def main():
 
             with open(app_params['target_mac'], 'w') as unbound_conf:
                 regex = r"(host.+{)(\s+hard.+net\s+)(.{17})(.+)(host-name\s\")(.+)(\"\;\s+})"
-                for statics in re.finditer(regex, dhcpconf, re.MULTILINE | re.DOTALL):
+                for c, statics in re.finditer(regex, dhcpconf, re.MULTILINE | re.DOTALL):
+                    unbound_conf.write('%s\n' % (c))
                     unbound_conf.write('%s %s\n' % (
                         statics.group[3], statics.group[7])
                     )
