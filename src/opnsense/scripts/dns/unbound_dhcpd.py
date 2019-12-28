@@ -116,9 +116,6 @@ def main():
             #me code
             with open(app_params['target_mac'], 'w') as unbound_conf:
                 for address in cached_leases:
-                    unbound_conf.write('local-data-ptr: "%s %s.%s"\n' % (
-                        address, cached_leases[address]['client-hostname'], app_params['domain'])
-                    )
                     unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         cached_leases[address]['client-hostname'], app_params['domain'], address)
                     )
