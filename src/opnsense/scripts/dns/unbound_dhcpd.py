@@ -72,6 +72,7 @@ def unbound_known_addresses():
 app_params = {'pid': '/var/run/unbound_dhcpd.pid',
               'domain': 'local',
               'target': '/var/unbound/dhcpleases.conf',
+              'target_mac': '/var/unbound/hostmac_entries.conf',
               'background': '1'}
 params.update_params(app_params)
 
@@ -112,7 +113,16 @@ def main():
                     unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         cached_leases[address]['client-hostname'], app_params['domain'], address)
                     )
-                #me code
+            #me code
+            with open(app_params['target_mac'], 'w') as unbound_conf:
+                for address in cached_leases:
+                    unbound_conf.write('local-data-ptr: "%s %s.%s"\n' % (
+                        address, cached_leases[address]['client-hostname'], app_params['domain'])
+                    )
+                    unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
+                        cached_leases[address]['client-hostname'], app_params['domain'], address)
+                    )
+
             # signal unbound
             for address in cached_leases:
                 if address not in known_addresses:
