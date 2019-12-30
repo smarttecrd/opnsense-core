@@ -117,24 +117,27 @@ def main():
                     )
             #me code
 
-            with open(app_params['src_dhcp'], 'r') as dhcp_conf:
-                dhcpconf = dhcp_conf.read()
+            with open(app_params['src_dhcp'],'r') as dhcpdconffile:
+                dhcpdconfig = (dhcpdconffile.read())
 
-            with open(app_params['target_mac'], 'w') as unbound_conf:
-                regex = r"(host.+{)(\s+hard.+net\s+)(.{17})(.+)(host-name\s\")(.+)(\"\;\s+})"
-                for c, statics in re.finditer(regex, dhcpconf, re.MULTILINE | re.DOTALL):
-                    unbound_conf.write('%s\n' % (c))
-                    unbound_conf.write('%s %s\n' % (
-                        statics.group[3], statics.group[7])
-                    )
-                
+            regex = r"(?:^host.+{.*\n)([^\}]+)(?:})"
+            hostsmac = dict()
 
-            """with open(app_params['target_mac'], 'w') as unbound_conf:
-                for address in cached_leases:
-                    unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
-                        cached_leases[address]['client-hostname'], app_params['domain'], address)
-                    )
-            """
+            for host in re.finditer(regex, dhcpdconfig, re.IGNORECASE | re.MULTILINE):
+                ip = mac = hostname = None
+
+                for prop in host.group(1).split(";"):
+                    if 'hardware ethernet' in prop:
+                        mac = prop.split()[2]
+                    elif 'host-name' in prop:
+                        hostname = prop.split()[2].replace('\"','')
+                    elif 'fixed-address' in prop:
+                        ip = prop.split()[1]
+
+                if hostname != None and mac != None and ip == None:
+                    hostsmac[mac] = hostname
+
+
             # signal unbound
             for address in cached_leases:
                 if address not in known_addresses:
