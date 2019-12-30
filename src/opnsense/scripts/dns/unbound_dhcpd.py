@@ -141,14 +141,14 @@ def main():
 
                     #check and add to static host - ip dictionary
                     if cached_leases[address]['mac-address'] in shost_mac and \
-                        cached_leases[address]['client-hostname'] != shost_mac[cached_leases[address]['mac-address']]:
-                        shost_ip[address] = shost_mac[cached_leases[address]['mac-address']]
+                       cached_leases[address]['client-hostname'] != shost_mac[cached_leases[address]['mac-address']]:
+                           shost_ip[address] = shost_mac[cached_leases[address]['mac-address']]
                     
             #dump dns output to target statics
             with open(app_params['target_mac'], 'w') as unbound_st_conf:
                 for address in shost_ip:
                     unbound_st_conf.write('local-data: "%s.%s IN A %s"\n' % (
-                            shost_ip[address], app_params['domain'], address)
+                        shost_ip[address], app_params['domain'], address)
                     )
 
             # signal unbound
