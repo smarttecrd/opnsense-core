@@ -270,9 +270,9 @@ include_once("head.inc");
                       <tr>
                         <td><a id="help_for_regdhcp_machost" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?= gettext('DHCP Static Mac-Host Mappings');?></td>
                         <td>
-                          <input name="regdhcp_machost" type="checkbox" id="regdhcp_machost" value="yes" <?=!empty($pconfig['regdhcp_machost']) ? 'checked="checked"' : '';?> />
-                          <?= gettext('Register DHCP leases with static Mac-Host mappings') ?>
-                          <div class="hidden" data-for="help_for_regdhcp_machost">
+                          <input name="regdhcp_hostmac" type="checkbox" id="regdhcp_hostmac" value="yes" <?=!empty($pconfig['regdhcp_hostmac']) ? 'checked="checked"' : '';?> />
+                          <?= gettext('Register DHCP leases with static Host-Mac mappings') ?>
+                          <div class="hidden" data-for="help_for_regdhcp_hostmac">
                             <?= sprintf(gettext("If this option is set, then DHCP statics with Host and Mac only will ".
                                 "be registered in Unbound when a lease is conceded for the mac address, ".
                                 "allowing to resolve the mac address by given hostname. You should also set the domain in %s".
