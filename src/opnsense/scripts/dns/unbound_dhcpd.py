@@ -74,7 +74,7 @@ app_params = {'pid': '/var/run/unbound_dhcpd.pid',
               'domain': 'local',
               'src_dhcp': '/var/dhcpd/etc/dhcpd.conf',
               'target': '/var/unbound/dhcpleases.conf',
-              'target_mac': '/var/unbound/hostmac_entries.conf',
+              'target_host_mac': '/var/unbound/dhcpleases_hostmac.conf',
               'background': '1'}
 params.update_params(app_params)
 
@@ -112,7 +112,8 @@ def main():
                 dhcpdconfig = (dhcpdconffile.read())
 
             regex = r"(?:^host.+{.*\n)([^\}]+)(?:})"
-            shost_mac = shost_ip = dict()
+            shost_mac = dict()
+            shost_ip = dict()
 
             for host in re.finditer(regex, dhcpdconfig, re.IGNORECASE | re.MULTILINE):
                 ip = mac = hostname = None
@@ -138,18 +139,25 @@ def main():
                     unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         cached_leases[address]['client-hostname'], app_params['domain'], address)
                     )
-
                     #check and add to static host - ip dictionary
-                    if cached_leases[address]['mac-address'] in shost_mac and \
-                       cached_leases[address]['client-hostname'] != shost_mac[cached_leases[address]['mac-address']]:
-                           shost_ip[address] = shost_mac[cached_leases[address]['mac-address']]
+                    try:
+                        address_mac =  cached_leases[address]['hardware']['mac-address']
+                    except:
+                        address_mac = None
+
+                    if address_mac != None and address_mac in shost_mac and shost_mac[address_mac] != cached_leases[address]['client-hostname']:
+                        shost_ip[address] = shost_mac[address_mac]
                     
+
             #dump dns output to target statics
-            with open(app_params['target_mac'], 'w') as unbound_st_conf:
+            with open(app_params['target_host_mac'], 'w') as unbound_st_conf:
                 for address in shost_ip:
                     unbound_st_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         shost_ip[address], app_params['domain'], address)
                     )
+                    #signal unbound
+                    fqdn = '%s.%s' % (shost_ip[address], app_params['domain'])
+                    unbound_control(['local_data', fqdn, 'IN A', address])
 
             # signal unbound
             for address in cached_leases:

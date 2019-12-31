@@ -45,6 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $pconfig['forwarding'] = isset($a_unboundcfg['forwarding']);
     $pconfig['reglladdr6'] = empty($a_unboundcfg['noreglladdr6']);
     $pconfig['regdhcp'] = isset($a_unboundcfg['regdhcp']);
+    $pconfig['regdhcp_machost'] = isset($a_unboundcfg['regdhcp_machost']);
     $pconfig['regdhcpstatic'] = isset($a_unboundcfg['regdhcpstatic']);
     $pconfig['txtsupport'] = isset($a_unboundcfg['txtsupport']);
     // text values
@@ -114,6 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $a_unboundcfg['forwarding'] = !empty($pconfig['forwarding']);
             $a_unboundcfg['noreglladdr6'] = empty($pconfig['reglladdr6']);
             $a_unboundcfg['regdhcp'] = !empty($pconfig['regdhcp']);
+            $a_unboundcfg['regdhcp_machost'] = !empty($pconfig['regdhcp_machost']);
             $a_unboundcfg['regdhcpstatic'] = !empty($pconfig['regdhcpstatic']);
             $a_unboundcfg['txtsupport'] = !empty($pconfig['txtsupport']);
 
@@ -261,6 +263,19 @@ include_once("head.inc");
                             <?= sprintf(gettext("If this option is set, then DHCP static mappings will ".
                                 "be registered in Unbound, so that their name can be ".
                                 "resolved. You should also set the domain in %s".
+                                "System: General setup%s to the proper value."),'<a href="system_general.php">','</a>');?>
+                          </div>
+                        </td>
+                      </tr>
+                      <tr>
+                        <td><a id="help_for_regdhcp_machost" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?= gettext('DHCP Static Mac-Host Mappings');?></td>
+                        <td>
+                          <input name="regdhcp_machost" type="checkbox" id="regdhcp_machost" value="yes" <?=!empty($pconfig['regdhcp_machost']) ? 'checked="checked"' : '';?> />
+                          <?= gettext('Register DHCP leases with static Mac-Host mappings') ?>
+                          <div class="hidden" data-for="help_for_regdhcp_machost">
+                            <?= sprintf(gettext("If this option is set, then DHCP statics with Host and Mac only will ".
+                                "be registered in Unbound when a lease is conceded for the mac address, ".
+                                "allowing to resolve the mac address by given hostname. You should also set the domain in %s".
                                 "System: General setup%s to the proper value."),'<a href="system_general.php">','</a>');?>
                           </div>
                         </td>
