@@ -45,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
     $pconfig['forwarding'] = isset($a_unboundcfg['forwarding']);
     $pconfig['reglladdr6'] = empty($a_unboundcfg['noreglladdr6']);
     $pconfig['regdhcp'] = isset($a_unboundcfg['regdhcp']);
-    $pconfig['regdhcp_machost'] = isset($a_unboundcfg['regdhcp_machost']);
+    $pconfig['regdhcp_hostmac'] = isset($a_unboundcfg['regdhcp_hostmac']);
     $pconfig['regdhcpstatic'] = isset($a_unboundcfg['regdhcpstatic']);
     $pconfig['txtsupport'] = isset($a_unboundcfg['txtsupport']);
     // text values
@@ -115,7 +115,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'GET') {
             $a_unboundcfg['forwarding'] = !empty($pconfig['forwarding']);
             $a_unboundcfg['noreglladdr6'] = empty($pconfig['reglladdr6']);
             $a_unboundcfg['regdhcp'] = !empty($pconfig['regdhcp']);
-            $a_unboundcfg['regdhcp_machost'] = !empty($pconfig['regdhcp_machost']);
+            $a_unboundcfg['regdhcp_hostmac'] = !empty($pconfig['regdhcp_hostmac']);
             $a_unboundcfg['regdhcpstatic'] = !empty($pconfig['regdhcpstatic']);
             $a_unboundcfg['txtsupport'] = !empty($pconfig['txtsupport']);
 
@@ -268,7 +268,7 @@ include_once("head.inc");
                         </td>
                       </tr>
                       <tr>
-                        <td><a id="help_for_regdhcp_machost" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?= gettext('DHCP Static Mac-Host Mappings');?></td>
+                        <td><a id="help_for_regdhcp_hostmac" href="#" class="showhelp"><i class="fa fa-info-circle"></i></a> <?= gettext('DHCP Static Mac-Host Mappings');?></td>
                         <td>
                           <input name="regdhcp_hostmac" type="checkbox" id="regdhcp_hostmac" value="yes" <?=!empty($pconfig['regdhcp_hostmac']) ? 'checked="checked"' : '';?> />
                           <?= gettext('Register DHCP leases with static Host-Mac mappings') ?>
