@@ -242,6 +242,13 @@ EOF;
         $include_dhcpleases = '';
     }
 
+    if (isset($config['unbound']['regdhcp_hostmac'])) {
+        $include_dhcpleases_hostmac = 'include: /var/unbound/dhcpleases_hostmac.conf';
+        @touch('/var/unbound/dhcpleases_hostmac.conf');
+    } else {
+        $include_dhcpleases_hostmac = '';
+    }
+
     $forward_conf = '';
     if (isset($config['unbound']['forwarding'])) {
         $dnsservers = array();
@@ -336,6 +343,9 @@ include: /var/unbound/access_lists.conf
 
 # Static host entries
 include: /var/unbound/host_entries.conf
+
+# DHCP leases with static host-mac (if configured)
+{$include_dhcpleases_hostmac}
 
 # DHCP leases (if configured)
 {$include_dhcpleases}

@@ -38,6 +38,7 @@ import tempfile
 from daemonize import Daemonize
 import watchers.dhcpd
 import params
+import re
 
 
 def unbound_control(commands, output_stream=None):
@@ -71,7 +72,9 @@ def unbound_known_addresses():
 # parse input params
 app_params = {'pid': '/var/run/unbound_dhcpd.pid',
               'domain': 'local',
+              'src_dhcp': '/var/dhcpd/etc/dhcpd.conf',
               'target': '/var/unbound/dhcpleases.conf',
+              'target_host_mac': '/var/unbound/dhcpleases_hostmac.conf',
               'background': '1'}
 params.update_params(app_params)
 
@@ -103,6 +106,30 @@ def main():
                     dhcpd_changed = True
 
         if dhcpd_changed:
+
+            #gettin host-mac dictionary
+            with open(app_params['src_dhcp'],'r') as dhcpdconffile:
+                dhcpdconfig = (dhcpdconffile.read())
+
+            regex = r"(?:^host.+{.*\n)([^\}]+)(?:})"
+            shost_mac = dict()
+            shost_ip = dict()
+
+            for host in re.finditer(regex, dhcpdconfig, re.IGNORECASE | re.MULTILINE):
+                ip = mac = hostname = None
+
+                for prop in host.group(1).split(";"):
+                    if 'hardware ethernet' in prop:
+                        mac = prop.split()[2]
+                    elif 'host-name' in prop:
+                        hostname = prop.split()[2].replace('\"','')
+                    elif 'fixed-address' in prop:
+                        ip = prop.split()[1]
+
+                if hostname != None and mac != None and ip == None:
+                    shost_mac[mac] = hostname
+
+
             # dump dns output to target
             with open(app_params['target'], 'w') as unbound_conf:
                 for address in cached_leases:
@@ -112,6 +139,26 @@ def main():
                     unbound_conf.write('local-data: "%s.%s IN A %s"\n' % (
                         cached_leases[address]['client-hostname'], app_params['domain'], address)
                     )
+                    #check and add to static host - ip dictionary
+                    try:
+                        address_mac =  cached_leases[address]['hardware']['mac-address']
+                    except:
+                        address_mac = None
+
+                    if address_mac != None and address_mac in shost_mac and shost_mac[address_mac] != cached_leases[address]['client-hostname']:
+                        shost_ip[address] = shost_mac[address_mac]
+                    
+
+            #dump dns output to target statics
+            with open(app_params['target_host_mac'], 'w') as unbound_st_conf:
+                for address in shost_ip:
+                    unbound_st_conf.write('local-data: "%s.%s IN A %s"\n' % (
+                        shost_ip[address], app_params['domain'], address)
+                    )
+                    #signal unbound
+                    fqdn = '%s.%s' % (shost_ip[address], app_params['domain'])
+                    unbound_control(['local_data', fqdn, 'IN A', address])
+
             # signal unbound
             for address in cached_leases:
                 if address not in known_addresses:
